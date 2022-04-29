@@ -52,13 +52,21 @@ app.post('/api/notes', (req, res) =>{
       err
         ? console.error(err)
         : console.log('New note has been written to JSON file')
-      );
-   });
-   res.json(newNote)
-  }
+      )
+   })
+   const response = {
+     status: 'success',
+     body: newNote,
+   };
+   console.log(response);
+   res.status(201).json(response);
+ } else {
+   res.status(500).json('Error');
+ }
 })
 
 app.delete("/api/notes/:id", (req, res) => {
+  console.log(req.method, req.url);
   res.send("delete requested");
   fs.readFile("./db/db.json", "utf-8", (err, data) => {
       const notes = JSON.parse(data);

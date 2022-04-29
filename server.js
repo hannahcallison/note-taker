@@ -38,35 +38,45 @@ app.post('/api/notes', (req, res) =>{
  // If all the required properties are present
  if (title && text) {
    // Variable for the object we will save
-   const newNotes = {
+   const newNote = {
      title,
      text,
      id: uuid(),
    };
 
-   fs.readFile('./db/db.json', 'utf-8', (err,data) => {
+   fs.readFile('./db/db.json', 'utf-8', (err, data) => {
       const notes = JSON.parse(data);
       console.log(req.body);
-      notes.push(newNotes);
-      const noteStr = JSON.stringify(notes);
-      fs.writeFile('./db/db.json', noteStr, (err) =>
+      notes.push(newNote);
+      fs.writeFile('./db/db.json', JSON.stringify(notes), (err) =>
       err
         ? console.error(err)
-        : console.log(`New note has been written to JSON file`)
-      )
-   })
-   const response = {
-     status: 'success',
-     body: newNotes,
-   };
-
-   console.log(response);
-   res.status(201).json(response);
- } else {
-   res.status(500).json('Error in posting review');
- }
+        : console.log('New note has been written to JSON file')
+      );
+   });
+   res.json(newNote)
+  }
 })
+
+app.delete("/api/notes/:id", (req, res) => {
+  res.send("delete requested");
+  fs.readFile("./db/db.json", "utf-8", (err, data) => {
+      const notes = JSON.parse(data);
+      const noteDelete = notes.filter((notes) => notes.id != req.params.id);
+      const noteStr = JSON.stringify(noteDelete);
+      console.log(noteStr);
+      fs.writeFile("./db/db.json", noteStr, (err) =>
+          err 
+          ? console.error(err) 
+          : console.log(`Note deleted`)
+      );
+  });
+});
+
+app.get('*', (req, res) =>
+  res.sendFile(path.join(__dirname, '/public/index.html'))
+);
 
 app.listen(PORT, () =>
   console.log(`App listening at http://localhost:${PORT} 🚀`)
-);
+)

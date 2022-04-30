@@ -12,18 +12,12 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static('public'));
 
-app.get('/', (req, res) =>
-  res.sendFile(path.join(__dirname, '/public/index.html'))
+app.get('/notes', (req, res) =>
+  res.sendFile(path.join(__dirname, '/public/notes.html'))
 );
 
-// GET request for notes
-app.get('/api/notes', (req, res) => {
-  console.info(`GET /api/notes`);
-  res.status(200).json(reviews);
-});
 
-
-// POST request to add a review
+// POST request to add a note
 app.post('/api/notes', (req, res) => {
   // Log that a POST request was received
   console.info(`${req.method} request received to add a note`);
@@ -39,6 +33,30 @@ app.post('/api/notes', (req, res) => {
       text,
       Note_id: uuid(),
     };
+
+
+    // Obtain existing reviews
+    fs.readFile('./db/db.json', 'utf8', (err, data) => {
+      if (err) {
+        console.error(err);
+      } else {
+        // Convert string into JSON object
+        const parsedReviews = JSON.parse(data);
+
+        // Add a new review
+        parsedReviews.push(newReview);
+
+        // Write updated reviews back to the file
+        fs.writeFile(
+          './db/reviews.json',
+          JSON.stringify(parsedReviews, null, 4),
+          (writeErr) =>
+            writeErr
+              ? console.error(writeErr)
+              : console.info('Successfully updated reviews!')
+        );
+      }
+    });
 
     const response = {
       status: 'success',
